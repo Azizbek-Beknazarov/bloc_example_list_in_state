@@ -19,7 +19,6 @@ class _HomePageState extends State<HomePage> {
         title: const Text("Task app"),
       ),
       body: BlocBuilder<TodoBloc, TodoState>(builder: (_, state) {
-
         // infolar olingunga qadar loading bo'ladi.
         if (state.status == TodoStatus.loading) {
           return const Center(
@@ -30,10 +29,61 @@ class _HomePageState extends State<HomePage> {
         //success bo'lsa listdagi infolarni ko'rsatamiz
         if (state.status == TodoStatus.success) {
           return ListView.builder(
-              itemCount: state.titleList?.length,
+              itemCount: state.titleList.length,
               itemBuilder: (_, index) {
                 return Card(
-                  child: Text(state.titleList![index]),
+                  child: ListTile(
+                    title: Text(state.titleList[index]),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                  context: context,
+                                  builder: (_) {
+                                    String name = state.titleList[index];
+                                    return Card(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          TextFormField(
+                                            autofocus: true,
+                                            decoration: const InputDecoration(
+                                              labelText: "Name",
+                                            ),
+                                            initialValue: name,
+                                            onChanged: (value) {
+                                              name = value;
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: const Text("Update"),
+                                            onPressed: () {
+                                              context.read<TodoBloc>().add(
+                                                  UpdateTodoEvent(
+                                                      index: index,
+                                                      title: name));
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  });
+                            },
+                            icon: const Icon(Icons.edit)),
+                        IconButton(
+                            onPressed: () {
+                              context
+                                  .read<TodoBloc>()
+                                  .add(DeleteTodoEvent(index: index));
+                            },
+                            icon: const Icon(Icons.delete)),
+                      ],
+                    ),
+                  ),
                 );
               });
         }
@@ -71,11 +121,9 @@ class _HomePageState extends State<HomePage> {
                         TextButton(
                           child: const Text("Submit"),
                           onPressed: () {
-
                             // event shu yerda chaqiriladi. va textfielddagi yozuvlar eventdagi title berib yuboriladi.
-                            context
-                                .read<TodoBloc>()
-                                .add(AddTodoEvent(title: name ?? "1111"));
+                            context.read<TodoBloc>().add(
+                                AddTodoEvent(title: name?.trim() ?? "1111"));
                             Navigator.pop(context);
                             name = "";
                           },

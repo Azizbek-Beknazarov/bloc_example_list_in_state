@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       home: BlocProvider(
         create: (_) => TodoBloc(),
-        child: HomePage(),
+        child: const HomePage(),
       ),
     );
   }
